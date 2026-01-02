@@ -11,7 +11,6 @@
 
 <h1>Losowanie ról</h1>
 <button onclick="losuj()">Losuj rolę</button>
-<button onclick="reset()">Resetuj role</button>
 <h2 id="wynik"></h2>
 
 <script>
@@ -33,39 +32,32 @@
         await db.runTransaction(async (transaction) => {
             const doc = await transaction.get(ref);
 
+            // jeśli dokument nie istnieje, tworzymy listę
             if (!doc.exists) {
                 transaction.set(ref, {
-                    role: ["Obserwator", "Psycholog", "Rodzic", "Dziecko", "Nauczyciel"]
+                    role: ["Obserwator", "Obserwator", "Psycholog", "Rodzic", "Dziecko", "Nauczyciel"]
                 });
-                document.getElementById("wynik").innerText = "Kliknij jeszcze raz";
+                document.getElementById("wynik").innerText = "Kliknij jeszcze raz, aby wylosować rolę!";
                 return;
             }
 
             let role = doc.data().role;
 
             if (role.length === 0) {
-                document.getElementById("wynik").innerText =
-                    "Wszystkie role zostały wylosowane";
+                document.getElementById("wynik").innerText = "Wszystkie role zostały wylosowane!";
                 return;
             }
 
+            // losowanie roli
             const index = Math.floor(Math.random() * role.length);
             const wylosowana = role[index];
 
+            // usuwamy wylosowaną rolę z listy
             role.splice(index, 1);
             transaction.update(ref, { role });
 
-            document.getElementById("wynik").innerText =
-                "Twoja rola: " + wylosowana;
+            document.getElementById("wynik").innerText = "Twoja rola: " + wylosowana;
         });
-    }
-
-    async function reset() {
-        const ref = db.collection("role").doc("lista");
-        await ref.set({
-            role: ["Obserwator", "Psycholog", "Rodzic", "Dziecko", "Nauczyciel"]
-        });
-        document.getElementById("wynik").innerText = "Role zostały zresetowane!";
     }
 </script>
 
