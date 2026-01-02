@@ -4,60 +4,68 @@
     <meta charset="UTF-8">
     <title>Losowanie ról</title>
 
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <!-- Firebase v9+ modular SDK -->
+    <script type="module">
+        // Import funkcji Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, runTransaction, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        // Konfiguracja Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAzRAl4V4DjPtcZzIQ4enH423_0md_DF9Q",
+            authDomain: "losowanie-4ee95.firebaseapp.com",
+            projectId: "losowanie-4ee95",
+            storageBucket: "losowanie-4ee95.firebasestorage.app",
+            messagingSenderId: "166958327922",
+            appId: "1:166958327922:web:9b6e05604cf20bfe853aeb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Lista ról (bez "Nauczyciel")
+        const listaRól = ["Obserwator", "Obserwator", "Psycholog", "Rodzic", "Dziecko"];
+
+        // Funkcja losująca
+        window.losuj = async function() {
+            const ref = doc(db, "role", "lista");
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const docSnap = await transaction.get(ref);
+
+                    // jeśli dokument nie istnieje lub lista pusta → reset
+                    if (!docSnap.exists() || docSnap.data().role.length === 0) {
+                        transaction.set(ref, { role: [...listaRól] });
+                        document.getElementById("wynik").innerText = "Lista została zresetowana! Kliknij jeszcze raz, aby wylosować rolę.";
+                        return;
+                    }
+
+                    let role = docSnap.data().role;
+
+                    // losowanie roli
+                    const index = Math.floor(Math.random() * role.length);
+                    const wylosowana = role[index];
+
+                    // usuń wylosowaną rolę
+                    role.splice(index, 1);
+                    transaction.update(ref, { role });
+
+                    // pokaż wynik
+                    document.getElementById("wynik").innerText = "Twoja rola: " + wylosowana;
+                });
+            } catch (err) {
+                console.error("Błąd transakcji: ", err);
+                document.getElementById("wynik").innerText = "Wystąpił błąd, spróbuj ponownie.";
+            }
+        };
+    </script>
 </head>
 <body>
 
 <h1>Losowanie ról</h1>
 <button onclick="losuj()">Losuj rolę</button>
 <h2 id="wynik"></h2>
-
-<script>
-    // Konfiguracja Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyAzRAl4V4DjPtcZzIQ4enH423_0md_DF9Q",
-        authDomain: "losowanie-4ee95.firebaseapp.com",
-        projectId: "losowanie-4ee95",
-        storageBucket: "losowanie-4ee95.firebasestorage.app",
-        messagingSenderId: "166958327922",
-        appId: "1:166958327922:web:9b6e05604cf20bfe853aeb"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    // Pełna lista ról
-    const listaRól = ["Obserwator", "Obserwator", "Psycholog", "Rodzic", "Dziecko"];
-
-    async function losuj() {
-        const ref = db.collection("role").doc("lista");
-
-        await db.runTransaction(async (transaction) => {
-            const doc = await transaction.get(ref);
-
-            // Jeśli dokument nie istnieje lub lista jest pusta → reset
-            if (!doc.exists || doc.data().role.length === 0) {
-                transaction.set(ref, { role: [...listaRól] });
-                document.getElementById("wynik").innerText = "Lista została zresetowana! Kliknij jeszcze raz, aby wylosować rolę.";
-                return;
-            }
-
-            let role = doc.data().role;
-
-            // Losowanie roli
-            const index = Math.floor(Math.random() * role.length);
-            const wylosowana = role[index];
-
-            // Usunięcie wylosowanej roli z listy
-            role.splice(index, 1);
-            transaction.update(ref, { role });
-
-            // Wyświetlenie wyniku
-            document.getElementById("wynik").innerText = "Twoja rola: " + wylosowana;
-        });
-    }
-</script>
 
 </body>
 </html>
