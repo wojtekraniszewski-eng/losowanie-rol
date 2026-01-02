@@ -11,6 +11,7 @@
 
 <h1>Losowanie ról</h1>
 <button onclick="losuj()">Losuj rolę</button>
+<button onclick="reset()">Resetuj role</button>
 <h2 id="wynik"></h2>
 
 <script>
@@ -35,11 +36,11 @@
             if (!doc.exists) {
                 transaction.set(ref, {
                     role: [
-                        "Lider",
-                        "Zwiadowca",
-                        "Strateg",
-                        "Wsparcie",
-                        "Sabotażysta"
+                        "Obserwator",
+                        "Psycholog",
+                        "Rodzic",
+                        "Dziecko",
+                        "Obserwator"
                     ]
                 });
                 document.getElementById("wynik").innerText =
@@ -64,6 +65,14 @@
             document.getElementById("wynik").innerText =
                 "Twoja rola: " + wylosowana;
         });
+    async function reset() {
+        const ref = db.collection("role").doc("lista");
+        await ref.set({
+            role: ["Lider", "Zwiadowca", "Strateg", "Wsparcie", "Sabotażysta"]
+        });
+        document.getElementById("wynik").innerText = "Role zostały zresetowane!";
+}
+ 
     }
 </script>
 
