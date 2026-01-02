@@ -35,16 +35,9 @@
 
             if (!doc.exists) {
                 transaction.set(ref, {
-                    role: [
-                        "Obserwator",
-                        "Psycholog",
-                        "Rodzic",
-                        "Dziecko",
-                        "Obserwator"
-                    ]
+                    role: ["Obserwator", "Psycholog", "Rodzic", "Dziecko", "Nauczyciel"]
                 });
-                document.getElementById("wynik").innerText =
-                    "Kliknij jeszcze raz";
+                document.getElementById("wynik").innerText = "Kliknij jeszcze raz";
                 return;
             }
 
@@ -65,14 +58,14 @@
             document.getElementById("wynik").innerText =
                 "Twoja rola: " + wylosowana;
         });
+    }
+
     async function reset() {
         const ref = db.collection("role").doc("lista");
         await ref.set({
-            role: ["Lider", "Zwiadowca", "Strateg", "Wsparcie", "Sabotażysta"]
+            role: ["Obserwator", "Psycholog", "Rodzic", "Dziecko", "Nauczyciel"]
         });
         document.getElementById("wynik").innerText = "Role zostały zresetowane!";
-}
- 
     }
 </script>
 
