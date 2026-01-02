@@ -14,6 +14,7 @@
 <h2 id="wynik"></h2>
 
 <script>
+    // Konfiguracja Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyAzRAl4V4DjPtcZzIQ4enH423_0md_DF9Q",
         authDomain: "losowanie-4ee95.firebaseapp.com",
@@ -26,36 +27,33 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // Pełna lista ról
+    const listaRól = ["Obserwator", "Obserwator", "Psycholog", "Rodzic", "Dziecko", "Nauczyciel"];
+
     async function losuj() {
         const ref = db.collection("role").doc("lista");
 
         await db.runTransaction(async (transaction) => {
             const doc = await transaction.get(ref);
 
-            // jeśli dokument nie istnieje, tworzymy listę
-            if (!doc.exists) {
-                transaction.set(ref, {
-                    role: ["Obserwator", "Obserwator", "Psycholog", "Rodzic", "Dziecko", "Nauczyciel"]
-                });
-                document.getElementById("wynik").innerText = "Kliknij jeszcze raz, aby wylosować rolę!";
+            // Jeśli dokument nie istnieje lub lista jest pusta → reset
+            if (!doc.exists || doc.data().role.length === 0) {
+                transaction.set(ref, { role: [...listaRól] });
+                document.getElementById("wynik").innerText = "Lista została zresetowana! Kliknij jeszcze raz, aby wylosować rolę.";
                 return;
             }
 
             let role = doc.data().role;
 
-            if (role.length === 0) {
-                document.getElementById("wynik").innerText = "Wszystkie role zostały wylosowane!";
-                return;
-            }
-
-            // losowanie roli
+            // Losowanie roli
             const index = Math.floor(Math.random() * role.length);
             const wylosowana = role[index];
 
-            // usuwamy wylosowaną rolę z listy
+            // Usunięcie wylosowanej roli z listy
             role.splice(index, 1);
             transaction.update(ref, { role });
 
+            // Wyświetlenie wyniku
             document.getElementById("wynik").innerText = "Twoja rola: " + wylosowana;
         });
     }
