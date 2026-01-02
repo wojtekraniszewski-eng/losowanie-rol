@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Losowanie ról</title>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<h1>Losowanie ról</h1>
+<button onclick="losuj()">Losuj rolę</button>
+<h2 id="wynik"></h2>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAzRAl4V4DjPtcZzIQ4enH423_0md_DF9Q",
+        authDomain: "losowanie-4ee95.firebaseapp.com",
+        projectId: "losowanie-4ee95",
+        storageBucket: "losowanie-4ee95.firebasestorage.app",
+        messagingSenderId: "166958327922",
+        appId: "1:166958327922:web:9b6e05604cf20bfe853aeb"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function losuj() {
+        const ref = db.collection("role").doc("lista");
+
+        await db.runTransaction(async (transaction) => {
+            const doc = await transaction.get(ref);
+
+            if (!doc.exists) {
+                transaction.set(ref, {
+                    role: [
+                        "Lider",
+                        "Zwiadowca",
+                        "Strateg",
+                        "Wsparcie",
+                        "Sabotażysta"
+                    ]
+                });
+                document.getElementById("wynik").innerText =
+                    "Kliknij jeszcze raz";
+                return;
+            }
+
+            let role = doc.data().role;
+
+            if (role.length === 0) {
+                document.getElementById("wynik").innerText =
+                    "Wszystkie role zostały wylosowane";
+                return;
+            }
+
+            const index = Math.floor(Math.random() * role.length);
+            const wylosowana = role[index];
+
+            role.splice(index, 1);
+            transaction.update(ref, { role });
+
+            document.getElementById("wynik").innerText =
+                "Twoja rola: " + wylosowana;
+        });
+    }
+</script>
+
+</body>
+</html>
