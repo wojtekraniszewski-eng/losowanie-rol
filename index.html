@@ -6,7 +6,6 @@
 
     <!-- Firebase v9+ modular SDK -->
     <script type="module">
-        // Import funkcji Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getFirestore, doc, getDoc, runTransaction, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
@@ -23,10 +22,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Lista ról (bez "Nauczyciel")
-        const listaRól = ["Obserwator1", "Obserwator2", "Psycholog", "Rodzic", "Dziecko"];
+        // Lista ról (bez Nauczyciela, Obserwator x2)
+        const listaRól = ["Obserwator", "Obserwator", "Psycholog", "Rodzic", "Dziecko"];
 
-        // Funkcja losująca
+        // Funkcja losująca rolę
         window.losuj = async function() {
             const ref = doc(db, "role", "lista");
 
@@ -34,24 +33,28 @@
                 await runTransaction(db, async (transaction) => {
                     const docSnap = await transaction.get(ref);
 
+                    let role;
                     // jeśli dokument nie istnieje lub lista pusta → reset
                     if (!docSnap.exists() || docSnap.data().role.length === 0) {
-                        transaction.set(ref, { role: [...listaRól] });
+                        role = [...listaRól];
+                        transaction.set(ref, { role });
                         document.getElementById("wynik").innerText = "Lista została zresetowana! Kliknij jeszcze raz, aby wylosować rolę.";
                         return;
+                    } else {
+                        role = docSnap.data().role;
                     }
 
-                    let role = docSnap.data().role;
-
-                    // losowanie roli
+                    // Losowanie roli
                     const index = Math.floor(Math.random() * role.length);
                     const wylosowana = role[index];
 
-                    // usuń wylosowaną rolę
+                    // Usuń wylosowaną rolę
                     role.splice(index, 1);
+
+                    // Zapisz zmienioną listę w transakcji
                     transaction.update(ref, { role });
 
-                    // pokaż wynik
+                    // Wyświetl wynik
                     document.getElementById("wynik").innerText = "Twoja rola: " + wylosowana;
                 });
             } catch (err) {
