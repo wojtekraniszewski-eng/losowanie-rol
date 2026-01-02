@@ -28,7 +28,7 @@
     const db = firebase.firestore();
 
     // Pełna lista ról
-    const listaRól = ["Obserwator", "Obserwator", "Psycholog", "Rodzic", "Dziecko", "Nauczyciel"];
+    const listaRól = ["Obserwator", "Obserwator", "Psycholog", "Rodzic", "Dziecko"];
 
     async function losuj() {
         const ref = db.collection("role").doc("lista");
